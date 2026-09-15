@@ -7,7 +7,7 @@ resultsTemplate =
      <div class='api-mate-links'>
        {{#urls}}
          <div class='api-mate-link-wrapper'>
-           <div class='api-mate-link {{urlClass}}'>
+           <div class='api-mate-link {{urlClass}}' data-api-mate-call='{{name}}'>
              <a class='label' href='{{url}}' target='_blank'>GET</a>
              <a href='#' data-url='{{url}}' class='tooltipped label'
                 title='Send \"{{name}}\" using a POST request'
