@@ -6,7 +6,9 @@ append javascripts
   script(type="text/javascript", src="api_mate.js")
   script(type="module").
     import { faker } from './vendor/faker-en.js'
+    import { renderSVG } from './vendor/uqr.js'
     window.faker = faker
+    window.renderQrCodeSVG = renderSVG
 
 append content
 
@@ -28,3 +30,14 @@ append content
               | &times;
             h4 Response
           .modal-body
+
+    #qrcode-modal.modal.fade(data-backdrop="static", data-keyboard="false")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            button(type="button", class="close", data-dismiss="modal", aria-hidden="true")
+              | &times;
+            h4
+          .modal-body
+          .modal-footer
+            button.btn.btn-default.btn-sm(type="button", data-dismiss="modal") Close

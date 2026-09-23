@@ -12,6 +12,9 @@ resultsTemplate =
              <a href='#' data-url='{{url}}' class='tooltipped label'
                 title='Send \"{{name}}\" using a POST request'
                 data-api-mate-post='{{name}}'>POST</a>
+             <a href='#' data-url='{{url}}' class='tooltipped label'
+                title='Show a QR code to open this link on another device'
+                data-api-mate-qrcode='{{name}}'>QR</a>
              <span class='api-mate-method-name'>{{description}}</span>
              <a href='{{url}}' target='_blank'>{{url}}</a>
            </div>
