@@ -44,6 +44,8 @@ window.ApiMate = class ApiMate
     @templates['postError'] ?= postErrorTemplate
     @templates['preUpload'] ?= preUploadUrl
     @debug = false
+    @randomNames = false
+    @newNameOnJoin = false
     @urlsLast = null
 
   start: ->
@@ -94,12 +96,26 @@ window.ApiMate = class ApiMate
       @debug = selected
       true
 
+    # toggle to fill fullName with random realistic names
+    $("[data-api-mate-random-names]").on "click", =>
+      @randomNames = !$("[data-api-mate-random-names]").hasClass("active")
+      @randomizeFullName()
+      @generateUrls()
+      @addUrlsToPage(@urls)
+      true
+
+    # toggle to pick a new name every time a join link is opened
+    $("[data-api-mate-new-name-on-join]").on "click", =>
+      @newNameOnJoin = !$("[data-api-mate-new-name-on-join]").hasClass("active")
+      true
+
     # generate the links already on setup
     @generateUrls()
     @addUrlsToPage(@urls)
 
     # binding elements
     @bindPostRequests()
+    @bindJoinNameRotation()
 
     # search
     @bindSearch()
@@ -111,10 +127,18 @@ window.ApiMate = class ApiMate
     $("[data-api-mate-param*='name']").val(name)
     $("[data-api-mate-param*='meetingID']").val(name)
     $("[data-api-mate-param*='recordID']").val(name)
-    user = "User " + Math.floor(Math.random() * 10000000).toString()
-    $("[data-api-mate-param*='fullName']").val(user)
+    @randomizeFullName()
 
     @setMenuValuesFromURL()
+
+  # Sets a new name in the fullName input: a realistic one from Faker when random
+  # names are enabled, the plain numbered user otherwise.
+  randomizeFullName: ->
+    fullName = if @randomNames and window.faker?
+      window.faker.person.fullName()
+    else
+      "User " + Math.floor(Math.random() * 10000000).toString()
+    $("[data-api-mate-param*='fullName']").val(fullName)
 
   # Add a div with all links and a close button to the global
   # results container
@@ -332,6 +356,21 @@ window.ApiMate = class ApiMate
       'application/xml; charset=utf-8'
     else if method is 'setConfigXML'
       'application/x-www-form-urlencoded'
+
+  # Picks a new name every time a join link is opened, so each join enters the
+  # meeting as a different person. What the new name looks like is up to the random
+  # names toggle. The link is followed with the name currently in the menu and the
+  # rotation is deferred, because `addUrlsToPage` replaces the anchor that was
+  # clicked and would cancel the navigation about to happen.
+  bindJoinNameRotation: ->
+    $(document).on 'click', ".api-mate-link[data-api-mate-call='join'] a[target='_blank']", =>
+      if @newNameOnJoin
+        setTimeout( =>
+          @randomizeFullName()
+          @generateUrls()
+          @addUrlsToPage(@urls)
+        , 0)
+      true
 
   bindSearch: ->
     _apiMate = this

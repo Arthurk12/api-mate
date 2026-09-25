@@ -4,6 +4,9 @@ append stylesheets
   link(href="api_mate.css", media="all", rel="stylesheet", type="text/css")
 append javascripts
   script(type="text/javascript", src="api_mate.js")
+  script(type="module").
+    import { faker } from './vendor/faker-en.js'
+    window.faker = faker
 
 append content
 
