@@ -100,3 +100,20 @@ $font-size: 14px;
     margin-top: 10px;
   }
 }
+
+#qrcode-modal {
+  .modal-dialog {
+    width: 360px;
+    max-width: 100%;
+  }
+
+  .modal-header h4 {
+    margin: 0;
+  }
+
+  .modal-body svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}

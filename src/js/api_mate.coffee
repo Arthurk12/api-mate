@@ -2,6 +2,7 @@ $ ->
   placeholders =
     results: '#api-mate-results'
     modal: '#post-response-modal'
+    qrcode: '#qrcode-modal'
   apiMate = new ApiMate(placeholders)
   apiMate.start()
   $('#api-mate-results').on 'api-mate-urls-added', ->
@@ -25,6 +26,8 @@ window.ApiMate = class ApiMate
   #   the URLs generated.
   # * `modal`: a string with the jQuery selector for an element that will be used as
   #   a modal window (should follow bootstrap's model for modals).
+  # * `qrcode`: a string with the jQuery selector for the bootstrap modal that shows
+  #   the QR code of a link.
   #
   # `templates` should be an object with the properties:
   # * `results`: a string with a mustache template to show the list of links generated.
@@ -116,6 +119,7 @@ window.ApiMate = class ApiMate
     # binding elements
     @bindPostRequests()
     @bindJoinNameRotation()
+    @bindQrCodes()
 
     # search
     @bindSearch()
@@ -364,13 +368,40 @@ window.ApiMate = class ApiMate
   # clicked and would cancel the navigation about to happen.
   bindJoinNameRotation: ->
     $(document).on 'click', ".api-mate-link[data-api-mate-call='join'] a[target='_blank']", =>
-      if @newNameOnJoin
-        setTimeout( =>
-          @randomizeFullName()
-          @generateUrls()
-          @addUrlsToPage(@urls)
-        , 0)
+      setTimeout( =>
+        @rotateFullNameIfEnabled()
+      , 0)
       true
+
+  rotateFullNameIfEnabled: ->
+    if @newNameOnJoin
+      @randomizeFullName()
+      @generateUrls()
+      @addUrlsToPage(@urls)
+
+  # Shows the QR code of a link in a modal, to open it on another device (usually a
+  # phone) without copying the long URL by hand. The modal only closes explicitly and
+  # closing it counts as opening the link, so a join rotates the name like a click.
+  bindQrCodes: ->
+    _apiMate = this
+    modal = @placeholders['qrcode']
+    qrCodeCall = null
+
+    $(document).on 'click', 'a[data-api-mate-qrcode]', (e) ->
+      $target = $(this)
+      url = $target.attr('data-url')
+      qrCodeCall = $target.attr('data-api-mate-qrcode')
+
+      $('.modal-header h4', modal).text($target.siblings('.api-mate-method-name').text())
+      $('.modal-body', modal).html(window.renderQrCodeSVG(url, { border: 4 }))
+      $(modal).modal({ show: true })
+
+      e.preventDefault()
+      false
+
+    $(modal).on 'hidden.bs.modal', ->
+      _apiMate.rotateFullNameIfEnabled() if qrCodeCall is 'join'
+      qrCodeCall = null
 
   bindSearch: ->
     _apiMate = this
