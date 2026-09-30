@@ -2,7 +2,6 @@ $ ->
   placeholders =
     results: '#api-mate-results'
     modal: '#post-response-modal'
-    qrcode: '#qrcode-modal'
   apiMate = new ApiMate(placeholders)
   apiMate.start()
   $('#api-mate-results').on 'api-mate-urls-added', ->
@@ -26,8 +25,6 @@ window.ApiMate = class ApiMate
   #   the URLs generated.
   # * `modal`: a string with the jQuery selector for an element that will be used as
   #   a modal window (should follow bootstrap's model for modals).
-  # * `qrcode`: a string with the jQuery selector for the bootstrap modal that shows
-  #   the QR code of a link.
   #
   # `templates` should be an object with the properties:
   # * `results`: a string with a mustache template to show the list of links generated.
@@ -50,6 +47,7 @@ window.ApiMate = class ApiMate
     @randomNames = false
     @newNameOnJoin = false
     @urlsLast = null
+    @qrCodeAnchor = null
 
   start: ->
     # the toggles start in the state set in the markup
@@ -155,6 +153,10 @@ window.ApiMate = class ApiMate
     isEqual = urls? and @urlsLast? and (JSON.stringify(urls) == JSON.stringify(@urlsLast))
     return if isEqual
     @urlsLast = _.map(urls, _.clone)
+
+    # the popover would be left pointing to an anchor that no longer exists and
+    # showing a QR code of an outdated link
+    @closeQrCode(false)
 
     placeholder = $(@placeholders['results'])
     for item in urls
@@ -383,29 +385,66 @@ window.ApiMate = class ApiMate
       @generateUrls()
       @addUrlsToPage(@urls)
 
-  # Shows the QR code of a link in a modal, to open it on another device (usually a
-  # phone) without copying the long URL by hand. The modal only closes explicitly and
-  # closing it counts as opening the link, so a join rotates the name like a click.
+  # Shows the QR code of a link in a popover next to its button, to open it on another
+  # device (usually a phone) without copying the long URL by hand. Closing it counts as
+  # opening the link, so a join rotates the name like a click.
   bindQrCodes: ->
     _apiMate = this
-    modal = @placeholders['qrcode']
-    qrCodeCall = null
 
     $(document).on 'click', 'a[data-api-mate-qrcode]', (e) ->
-      $target = $(this)
-      url = $target.attr('data-url')
-      qrCodeCall = $target.attr('data-api-mate-qrcode')
-
-      $('.modal-header h4', modal).text($target.siblings('.api-mate-method-name').text())
-      $('.modal-body', modal).html(window.renderQrCodeSVG(url, { border: 4 }))
-      $(modal).modal({ show: true })
-
+      wasOpen = _apiMate.qrCodeAnchor is this
+      _apiMate.closeQrCode(true)
+      _apiMate.openQrCode(this) unless wasOpen
       e.preventDefault()
       false
 
-    $(modal).on 'hidden.bs.modal', ->
-      _apiMate.rotateFullNameIfEnabled() if qrCodeCall is 'join'
-      qrCodeCall = null
+    $(document).on 'click', '[data-api-mate-qrcode-close]', (e) ->
+      _apiMate.closeQrCode(true)
+      e.preventDefault()
+      false
+
+    $(document).on 'click', (e) ->
+      unless $(e.target).closest('.qrcode-popover').length
+        _apiMate.closeQrCode(true)
+      true
+
+    $(document).on 'keyup', (e) ->
+      _apiMate.closeQrCode(true) if e.which is 27
+      true
+
+  openQrCode: (anchor) ->
+    $anchor = $(anchor)
+    $anchor.tooltip('hide')
+    title = _.escape($anchor.siblings('.api-mate-method-name').text())
+    qrCode = window.renderQrCodeSVG($anchor.attr('data-url'), { border: 2 })
+    # the title goes in the content because bootstrap prefers the anchor's tooltip
+    # title over the one given here
+    $anchor.popover
+      html: true
+      trigger: 'manual'
+      placement: 'right'
+      container: 'body'
+      content: "<div class='qrcode-popover-title'>
+                  <button type='button' class='close' data-api-mate-qrcode-close='1' aria-label='Close'>&times;</button>
+                  #{title}
+                </div>#{qrCode}"
+      template: "<div class='popover qrcode-popover'><div class='arrow'></div><div class='popover-content'></div></div>"
+    $anchor.popover('show')
+    @qrCodeAnchor = anchor
+
+  # `rotateName` is false when the popover is closed by the page itself and not by the
+  # user. The rotation is deferred for the same reason as in `bindJoinNameRotation`:
+  # the click that closed the popover might be on a link about to be followed.
+  closeQrCode: (rotateName) ->
+    return unless @qrCodeAnchor?
+    $anchor = $(@qrCodeAnchor)
+    call = $anchor.attr('data-api-mate-qrcode')
+    $anchor.popover('destroy')
+    @qrCodeAnchor = null
+    if rotateName and call is 'join'
+      setTimeout( =>
+        @rotateFullNameIfEnabled()
+      , 0)
 
   bindSearch: ->
     _apiMate = this
