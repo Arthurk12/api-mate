@@ -52,6 +52,10 @@ window.ApiMate = class ApiMate
     @urlsLast = null
 
   start: ->
+    # the toggles start in the state set in the markup
+    @randomNames = $("[data-api-mate-random-names]").hasClass("active")
+    @newNameOnJoin = $("[data-api-mate-new-name-on-join]").hasClass("active")
+
     # set random values in some inputs
     @initializeMenu()
 
