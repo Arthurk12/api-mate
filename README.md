@@ -139,6 +139,29 @@ To watch for changes and compile the files automatically, run:
 
     [./node_modules/.bin/]cake watch
 
+### Flagging production servers
+
+Set `API_MATE_PRODUCTION_DOMAINS` when building to a list of domains separated by commas or
+spaces. When the server in use matches one of them, the page header turns red and the tab
+title starts with `[PRODUCTION]`:
+
+    API_MATE_PRODUCTION_DOMAINS="conf.example.com, node#.example.org, *customer*" cake build
+
+Each entry can be:
+
+* A domain, which also matches its subdomains: `conf.example.com` matches
+  `eu.conf.example.com`.
+* A domain with `#`, which matches any number: `node#.example.org` matches `node1.example.org`,
+  `node002.example.org` and so on. In an entry with `#`, every other number also matches any
+  number: `node#.dc2.example.org` matches `node1.dc3.example.org` too.
+* A text between asterisks, which matches any server that contains it: `*customer*` matches
+  `customer.example.com` and `mycustomers.example.net`. `#` does not work inside it.
+
+The build only writes the SHA-256 of each entry to `lib/production_domains.js`, so the list is
+not published in plain text. It can still be confirmed by anyone who guesses an entry in it,
+which is easy for a short text between asterisks. This is also why there are no regular
+expressions: they would have to be published as they are.
+
 
 License
 -------

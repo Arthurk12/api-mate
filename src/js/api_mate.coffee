@@ -118,6 +118,8 @@ window.ApiMate = class ApiMate
     @generateUrls()
     @addUrlsToPage(@urls)
 
+    @bindProductionWarning()
+
     # binding elements
     @bindPostRequests()
     @bindJoinNameRotation()
@@ -145,6 +147,17 @@ window.ApiMate = class ApiMate
     else
       "User " + Math.floor(Math.random() * 10000000).toString()
     $("[data-api-mate-param*='fullName']").val(fullName)
+
+  # Flags the page when the server set is in the list of production domains, so a tab
+  # pointing to production is not mistaken for one pointing to a test server.
+  bindProductionWarning: ->
+    pageTitle = document.title
+    update = ->
+      isProduction = isProductionServer($("[data-api-mate-server='url']").val())
+      $('body').toggleClass('production-server', isProduction)
+      document.title = if isProduction then "[PRODUCTION] #{pageTitle}" else pageTitle
+    $("[data-api-mate-server='url']").on "change keyup input", update
+    update()
 
   # Add a div with all links and a close button to the global
   # results container
@@ -529,6 +542,32 @@ setInputValue = (selector, value) ->
       $elem.prop('checked', val)
     else
       $elem.val(value)
+
+# Whether the host in `url` matches the list of production domains, which holds only
+# their SHA-256 (see the Cakefile for the wildcards). So instead of matching patterns,
+# this hashes every form of the host an entry could have: each of its parent domains,
+# also with the numbers replaced by `#`, and each of its substrings as `*substring*`.
+isProductionServer = (url) ->
+  hashes = window.apiMateProductionDomainHashes
+  return false unless url? and hashes?.length
+  host = url.trim().toLowerCase()
+    .replace(/^[a-z][a-z0-9+.-]*:\/\//, '')
+    .replace(/^[^\/@]*@/, '')
+    .split(/[\/:?#]/)[0]
+    .replace(/\.$/, '')
+  candidates = []
+  labels = host.split('.')
+  for i in [0...labels.length]
+    domain = labels[i..].join('.')
+    candidates.push(domain, domain.replace(/\d+/g, '#'))
+  for start in [0...host.length]
+    for end in [start+1..host.length]
+      candidates.push("*#{host[start...end]}*")
+  for candidate in candidates
+    shaObj = new jsSHA("SHA-256", "TEXT")
+    shaObj.update(candidate)
+    return true if shaObj.getHash("HEX") in hashes
+  false
 
 # Check if an input text field has a valid value (not empty).
 isFilled = (field) ->

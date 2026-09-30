@@ -1,5 +1,6 @@
 $font-size: 14px;
 $link-color: #008db6;
+$danger-color: #c0392b;
 
 body {
   overflow-x: hidden;
@@ -59,6 +60,46 @@ a {
 
     &:hover {
       color: $link-color;
+    }
+  }
+}
+
+#production-warning {
+  display: none;
+  margin-top: 8px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: #fff;
+  color: $danger-color;
+  font-size: $font-size;
+  font-weight: bold;
+  text-transform: uppercase;
+
+  .glyphicon {
+    margin-right: 6px;
+  }
+}
+
+body.production-server {
+  #page-header-wrapper {
+    background: $danger-color;
+    border-bottom-color: darken($danger-color, 10);
+  }
+
+  #production-warning {
+    display: inline-block;
+  }
+
+  #page-header-docs {
+    color: #fff;
+
+    a {
+      color: #fff;
+
+      &:hover {
+        color: #fff;
+        text-decoration: none;
+      }
     }
   }
 }

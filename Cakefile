@@ -1,4 +1,5 @@
 chokidar = require('chokidar')
+crypto = require('crypto')
 fs = require('fs')
 {spawn} = require('child_process')
 pug = require('pug')
@@ -52,11 +53,34 @@ compileJs = (done) ->
     run 'coffee', options, ->
       done?()
 
+# Writes the SHA-256 of each domain in the env var API_MATE_PRODUCTION_DOMAINS
+# (separated by commas or whitespace) to be matched against the server in use.
+# Only the hashes are published, so the page does not give away the list, which is
+# why the wildcards are limited to what the page can enumerate and hash itself:
+# * `#` is any number. The page replaces all numbers in the server with `#`, so an
+#   entry with `#` has all its numbers replaced too.
+# * `*text*` is any server that contains `text`. The page hashes every substring of
+#   the server wrapped in asterisks, which keeps it apart from a domain `text`.
+normalizeProductionDomain = (domain) ->
+  return domain if /^\*[^*]+\*$/.test(domain)
+  domain = domain.replace(/^\*?\./, '').replace(/\.$/, '')
+  if domain.indexOf('#') >= 0 then domain.replace(/\d+/g, '#') else domain
+
+compileProductionDomains = (done) ->
+  domains = (process.env.API_MATE_PRODUCTION_DOMAINS or '').toLowerCase().split(/[\s,]+/)
+  domains = (normalizeProductionDomain(domain) for domain in domains)
+  hashes = (crypto.createHash('sha256').update(domain).digest('hex') for domain in domains when domain)
+  js = "window.apiMateProductionDomainHashes = #{JSON.stringify(hashes)};\n"
+  fs.writeFileSync('lib/production_domains.js', js)
+  console.log timeNow() + " - production domains: #{hashes.length}"
+  done?()
+
 build = (done) ->
   compileView (err) ->
     compileCss (err) ->
       compileJs (err) ->
-        done?()
+        compileProductionDomains (err) ->
+          done?()
 
 watch = () ->
   watcher = chokidar.watch('src', { ignored: /[\/\\]\./, persistent: true })
