@@ -162,6 +162,9 @@ not published in plain text. It can still be confirmed by anyone who guesses an 
 which is easy for a short text between asterisks. This is also why there are no regular
 expressions: they would have to be published as they are.
 
+The `Deploy` workflow builds `master` with the repository secret `API_MATE_PRODUCTION_DOMAINS`
+and publishes the result to the branch `gh-pages`.
+
 
 License
 -------
