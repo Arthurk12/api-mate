@@ -44,6 +44,34 @@ a {
     #page-header-docs a:hover {
       color: #008db6; }
 
+#production-warning {
+  display: none;
+  margin-top: 8px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: #fff;
+  color: #c0392b;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase; }
+  #production-warning .glyphicon {
+    margin-right: 6px; }
+
+body.production-server #page-header-wrapper {
+  background: #c0392b;
+  border-bottom-color: #962d22; }
+
+body.production-server #production-warning {
+  display: inline-block; }
+
+body.production-server #page-header-docs {
+  color: #fff; }
+  body.production-server #page-header-docs a {
+    color: #fff; }
+    body.production-server #page-header-docs a:hover {
+      color: #fff;
+      text-decoration: none; }
+
 #theme {
   text-align: right;
   position: absolute;
@@ -271,14 +299,22 @@ body.dark-theme {
     float: right;
     margin-top: 10px; }
 
-#qrcode-modal .modal-dialog {
-  width: 360px;
-  max-width: 100%; }
-
-#qrcode-modal .modal-header h4 {
-  margin: 0; }
-
-#qrcode-modal .modal-body svg {
-  display: block;
-  width: 100%;
-  height: auto; }
+.qrcode-popover {
+  max-width: none; }
+  .qrcode-popover .qrcode-popover-title {
+    font-size: 13px;
+    white-space: nowrap;
+    margin-bottom: 6px; }
+    .qrcode-popover .qrcode-popover-title .close {
+      margin-left: 10px;
+      line-height: 18px;
+      color: #2c3e50;
+      opacity: 0.5; }
+      .qrcode-popover .qrcode-popover-title .close:hover {
+        opacity: 1; }
+  .qrcode-popover .popover-content {
+    padding: 8px; }
+    .qrcode-popover .popover-content svg {
+      display: block;
+      width: 220px;
+      height: 220px; }
