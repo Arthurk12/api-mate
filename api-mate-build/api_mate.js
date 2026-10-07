@@ -694,7 +694,7 @@
     if (domain.indexOf('/') >= 0) {
       domain = hostFromUrl(domain);
     }
-    return domain.replace(/^\*\./, '').replace(/\.$/, '');
+    return domain.replace(/:\d*$/, '').replace(/^\*\./, '').replace(/\.$/, '');
   };
 
   matchesProductionDomain = function(host, domain) {
