@@ -129,6 +129,35 @@ body.production-server #page-header-docs {
   #menu #menu-server {
     clear: both;
     margin-bottom: 10px; }
+    #menu #menu-server .tip {
+      font-size: 14px;
+      color: #888;
+      margin-top: 3px;
+      font-style: italic; }
+  #menu #production-domains {
+    margin: 5px 0 0;
+    padding: 0;
+    list-style: none; }
+    #menu #production-domains li {
+      display: inline-block;
+      margin: 0 4px 4px 0;
+      padding: 1px 4px 1px 8px;
+      border: 1px solid #c0392b;
+      border-radius: 3px;
+      color: #c0392b;
+      font-family: monospace; }
+      #menu #production-domains li.matched {
+        background: #c0392b;
+        color: #fff; }
+      #menu #production-domains li .close {
+        float: none;
+        margin-left: 6px;
+        font-size: 16px;
+        line-height: 1;
+        color: inherit;
+        opacity: .7; }
+        #menu #production-domains li .close:hover {
+          opacity: 1; }
   #menu #menu-inputs {
     clear: both;
     margin-top: 32px; }

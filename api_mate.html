@@ -88,6 +88,17 @@
                   <input class="form-control input-sm" id="input-custom-server-salt" type="text" value="8cd8ef52e8e101574e400365b55e11a6" placeholder="Salt" data-api-mate-server="salt">
                 </div>
               </div>
+              <div class="form-group">
+                <label class="control-label col-sm-3" for="input-production-domain">Production</label>
+                <div class="col-sm-9">
+                  <div class="input-group input-group-sm">
+                    <input class="form-control" id="input-production-domain" type="text" placeholder="Domain (empty to use the current server)" data-api-mate-production-domain="input"><span class="input-group-btn">
+                      <button class="btn btn-danger" type="button" data-api-mate-production-domain="add">Add</button></span>
+                  </div>
+                  <ul id="production-domains" data-api-mate-production-domain="list"></ul>
+                  <div class="tip">saved in this browser; e.g. conf.example.com, node#.example.org, *customer*</div>
+                </div>
+              </div>
             </div>
           </div>
           <div id="menu-inputs">
@@ -324,7 +335,6 @@ another/custom/call" data-api-mate-special-param="custom-calls" data-api-mate-se
     <script type="text/javascript" src="vendor/jsSHA.js"></script>
     <script type="text/javascript" src="vendor/keypress-2.1.4.min.js"></script>
     <script type="text/javascript" src="vendor/bigbluebutton-api.js"></script>
-    <script type="text/javascript" src="production_domains.js"></script>
     <script type="text/javascript" src="api_mate.js"></script>
     <script type="module">
       import { faker } from './vendor/faker-en.js'
