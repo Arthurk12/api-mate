@@ -602,11 +602,12 @@ hostFromUrl = (url) ->
     .split(/[\/:?#]/)[0]
     .replace(/\.$/, '')
 
-# Accepts a full URL too, so a server can be pasted as it is.
+# Accepts a full URL or a host with a port too, so a server can be pasted as it is.
+# The port is dropped because the host matched against never has one.
 normalizeProductionDomain = (domain) ->
   domain = domain?.trim().toLowerCase() or ''
   domain = hostFromUrl(domain) if domain.indexOf('/') >= 0
-  domain.replace(/^\*\./, '').replace(/\.$/, '')
+  domain.replace(/:\d*$/, '').replace(/^\*\./, '').replace(/\.$/, '')
 
 # In `domain`, `#` matches any number and `*` any text. Unless it starts with `*`, it
 # also matches its subdomains.
