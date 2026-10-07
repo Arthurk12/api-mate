@@ -160,42 +160,25 @@ body.production-server {
   }
 }
 
-#options {
-  margin-bottom: 15px;
-  text-align: right;
+#production-domains-toggle {
+  margin-right: 12px;
 
-  #options-actions {
-    margin-bottom: 5px;
-  }
-
-  button {
-    margin-bottom: 3px;
-
-    .glyphicon {
-      margin-right: 5px;
-      display: none;
-    }
-    &.active .glyphicon { display: inline-block; }
+  .glyphicon {
+    margin-right: 4px;
   }
 }
 
-#menu {
-  transition: all .8s;
+#production-domains-modal {
+  [data-api-mate-production-domain='add-current'] {
+    margin-top: 10px;
 
-  #menu-server {
-    clear: both;
-    margin-bottom: 10px;
-
-    .tip {
-      font-size: $font-size;
-      color: #888;
-      margin-top: 3px;
-      font-style: italic;
+    code {
+      margin-left: 6px;
     }
   }
 
   #production-domains {
-    margin: 5px 0 0;
+    margin: 15px 0 0;
     padding: 0;
     list-style: none;
 
@@ -226,6 +209,40 @@ body.production-server {
         }
       }
     }
+  }
+
+  .empty {
+    margin: 15px 0 0;
+    color: #888;
+    font-style: italic;
+  }
+}
+
+#options {
+  margin-bottom: 15px;
+  text-align: right;
+
+  #options-actions {
+    margin-bottom: 5px;
+  }
+
+  button {
+    margin-bottom: 3px;
+
+    .glyphicon {
+      margin-right: 5px;
+      display: none;
+    }
+    &.active .glyphicon { display: inline-block; }
+  }
+}
+
+#menu {
+  transition: all .8s;
+
+  #menu-server {
+    clear: both;
+    margin-bottom: 10px;
   }
 
   #menu-inputs {

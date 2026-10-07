@@ -10,6 +10,12 @@ append javascripts
     window.faker = faker
     window.renderQrCodeSVG = renderSVG
 
+block footer_actions
+  a#production-domains-toggle(href='#production-domains-modal', data-toggle='modal')
+    i.glyphicon.glyphicon-lock
+    | Production domains
+    span(data-api-mate-production-domain='count')
+
 append content
 
   #content.row.tab-content
@@ -30,3 +36,29 @@ append content
               | &times;
             h4 Response
           .modal-body
+
+    #production-domains-modal.modal.fade(tabindex='-1')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+            h4 Production domains
+          .modal-body
+            p.help-block
+              | When the server matches one of these domains, the page header turns red.
+              | The list is saved in this browser.
+            .input-group.input-group-sm
+              input#input-production-domain.form-control(type='text', placeholder='e.g. conf.example.com, node#.example.org, *customer*', data-api-mate-production-domain='input')
+              span.input-group-btn
+                button.btn.btn-danger(type='button', data-api-mate-production-domain='add')
+                  | Add
+            button.btn.btn-default.btn-sm(type='button', data-api-mate-production-domain='add-current')
+              | Add current server
+              code(data-api-mate-production-domain='current')
+            ul#production-domains(data-api-mate-production-domain='list')
+            p.empty(data-api-mate-production-domain='empty') No production domains configured.
+          .modal-footer
+            button.btn.btn-link.text-danger(type='button', data-api-mate-production-domain='clear')
+              | Clear all
+            button.btn.btn-default(type='button', data-dismiss='modal')
+              | Close

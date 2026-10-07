@@ -47,16 +47,6 @@
       label.control-label.col-sm-3(for='input-custom-server-salt') Shared secret
       .col-sm-9
         input#input-custom-server-salt.form-control.input-sm(type='text', value='8cd8ef52e8e101574e400365b55e11a6', placeholder='Salt', data-api-mate-server='salt')
-    .form-group
-      label.control-label.col-sm-3(for='input-production-domain') Production
-      .col-sm-9
-        .input-group.input-group-sm
-          input#input-production-domain.form-control(type='text', placeholder='Domain (empty to use the current server)', data-api-mate-production-domain='input')
-          span.input-group-btn
-            button.btn.btn-danger(type='button', data-api-mate-production-domain='add')
-              | Add
-        ul#production-domains(data-api-mate-production-domain='list')
-        .tip saved in this browser; e.g. conf.example.com, node#.example.org, *customer*
 
 #menu-inputs
 

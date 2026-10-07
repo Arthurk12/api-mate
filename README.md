@@ -141,13 +141,14 @@ To watch for changes and compile the files automatically, run:
 
 ### Flagging production servers
 
-The field "Production" in the server section keeps a list of production domains. When the
+The link "Production domains" in the footer opens a list of production domains. When the
 server in use matches one of them, the page header turns red and shows a "Production server"
 badge. The tab title shows the host of the server, to tell the tabs apart.
 
 The list is saved in the browser's `localStorage`, so each browser keeps its own and it is
-shared by all the API Mate tabs open in it. Clicking "Add" with the field empty adds the host of
-the current server, and the `×` next to a domain removes it. Each entry can be:
+shared by all the API Mate tabs open in it. In the list, "Add current server" adds the host of
+the server in use, the `×` next to a domain removes it and "Clear all" empties the list. Each
+entry can be:
 
 * A domain, which also matches its subdomains: `conf.example.com` matches
   `eu.conf.example.com`. A full URL can also be pasted, only its host is kept.

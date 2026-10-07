@@ -150,12 +150,13 @@ window.ApiMate = class ApiMate
 
   # Flags the page when the server set is in the list of production domains, so a tab
   # pointing to production is not mistaken for one pointing to a test server. The list
-  # is kept in the localStorage and managed in the menu. The tab title also shows the
-  # host, to tell the tabs apart.
+  # is kept in the localStorage and managed in a modal opened from the footer. The tab
+  # title also shows the host, to tell the tabs apart.
   bindProductionWarning: ->
     pageTitle = document.title
     $input = $("[data-api-mate-production-domain='input']")
     $list = $("[data-api-mate-production-domain='list']")
+    $addCurrent = $("[data-api-mate-production-domain='add-current']")
     serverHost = -> hostFromUrl($("[data-api-mate-server='url']").val())
 
     update = ->
@@ -169,17 +170,43 @@ window.ApiMate = class ApiMate
           .toggleClass('matched', matchesProductionDomain(host, domain))
           .append($remove)
           .appendTo($list)
+      $("[data-api-mate-production-domain='empty']").toggle(_.isEmpty(domains))
+      $("[data-api-mate-production-domain='clear']").prop('disabled', _.isEmpty(domains))
+      $("[data-api-mate-production-domain='count']").text(
+        if _.isEmpty(domains) then '' else " (#{domains.length})")
+      $("[data-api-mate-production-domain='current']").text(host)
+      $addCurrent.prop('disabled', not host or host in domains)
       isProduction = _.some(domains, (domain) -> matchesProductionDomain(host, domain))
       $('body').toggleClass('production-server', isProduction)
       document.title = if host then "#{host} - #{pageTitle}" else pageTitle
 
-    add = ->
-      domain = normalizeProductionDomain($input.val()) or serverHost()
+    add = (domain) ->
       return unless domain
       domains = loadProductionDomains()
       saveProductionDomains(domains.concat(domain)) unless domain in domains
-      $input.val('')
       update()
+
+    addTyped = ->
+      add(normalizeProductionDomain($input.val()))
+      $input.val('')
+
+    $("[data-api-mate-server='url']").on "change keyup input", update
+    $("[data-api-mate-production-domain='add']").on "click", addTyped
+    $input.on "keypress", (e) -> addTyped() if e.which is 13
+    $addCurrent.on "click", -> add(serverHost())
+    $list.on "click", ".close", ->
+      removed = $(this).data('domain')
+      saveProductionDomains(_.without(loadProductionDomains(), removed))
+      update()
+    $("[data-api-mate-production-domain='clear']").on "click", ->
+      if confirm("Remove all the production domains saved in this browser?")
+        saveProductionDomains([])
+        update()
+    $("#production-domains-modal").on "shown.bs.modal", -> $input.focus()
+    # keeps the other open tabs in sync with the list
+    $(window).on "storage", (e) ->
+      update() if e.originalEvent.key is productionDomainsKey
+    update()
 
     $("[data-api-mate-server='url']").on "change keyup input", update
     $("[data-api-mate-production-domain='add']").on "click", add
