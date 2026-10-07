@@ -150,7 +150,8 @@ window.ApiMate = class ApiMate
 
   # Flags the page when the server set is in the list of production domains, so a tab
   # pointing to production is not mistaken for one pointing to a test server. The list
-  # is kept in the localStorage and managed in the menu.
+  # is kept in the localStorage and managed in the menu. The tab title also shows the
+  # host, to tell the tabs apart.
   bindProductionWarning: ->
     pageTitle = document.title
     $input = $("[data-api-mate-production-domain='input']")
@@ -170,7 +171,7 @@ window.ApiMate = class ApiMate
           .appendTo($list)
       isProduction = _.some(domains, (domain) -> matchesProductionDomain(host, domain))
       $('body').toggleClass('production-server', isProduction)
-      document.title = if isProduction then "[PRODUCTION] #{pageTitle}" else pageTitle
+      document.title = if host then "#{host} - #{pageTitle}" else pageTitle
 
     add = ->
       domain = normalizeProductionDomain($input.val()) or serverHost()
