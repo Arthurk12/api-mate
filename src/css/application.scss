@@ -185,6 +185,47 @@ body.production-server {
   #menu-server {
     clear: both;
     margin-bottom: 10px;
+
+    .tip {
+      font-size: $font-size;
+      color: #888;
+      margin-top: 3px;
+      font-style: italic;
+    }
+  }
+
+  #production-domains {
+    margin: 5px 0 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: inline-block;
+      margin: 0 4px 4px 0;
+      padding: 1px 4px 1px 8px;
+      border: 1px solid $danger-color;
+      border-radius: 3px;
+      color: $danger-color;
+      font-family: monospace;
+
+      &.matched {
+        background: $danger-color;
+        color: #fff;
+      }
+
+      .close {
+        float: none;
+        margin-left: 6px;
+        font-size: 16px;
+        line-height: 1;
+        color: inherit;
+        opacity: .7;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
   }
 
   #menu-inputs {

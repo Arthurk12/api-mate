@@ -149,14 +149,47 @@ window.ApiMate = class ApiMate
     $("[data-api-mate-param*='fullName']").val(fullName)
 
   # Flags the page when the server set is in the list of production domains, so a tab
-  # pointing to production is not mistaken for one pointing to a test server.
+  # pointing to production is not mistaken for one pointing to a test server. The list
+  # is kept in the localStorage and managed in the menu.
   bindProductionWarning: ->
     pageTitle = document.title
+    $input = $("[data-api-mate-production-domain='input']")
+    $list = $("[data-api-mate-production-domain='list']")
+    serverHost = -> hostFromUrl($("[data-api-mate-server='url']").val())
+
     update = ->
-      isProduction = isProductionServer($("[data-api-mate-server='url']").val())
+      host = serverHost()
+      domains = loadProductionDomains()
+      $list.empty()
+      for domain in domains
+        $remove = $('<button type="button" class="close" aria-label="Remove">&times;</button>')
+          .data('domain', domain)
+        $('<li>').text(domain)
+          .toggleClass('matched', matchesProductionDomain(host, domain))
+          .append($remove)
+          .appendTo($list)
+      isProduction = _.some(domains, (domain) -> matchesProductionDomain(host, domain))
       $('body').toggleClass('production-server', isProduction)
       document.title = if isProduction then "[PRODUCTION] #{pageTitle}" else pageTitle
+
+    add = ->
+      domain = normalizeProductionDomain($input.val()) or serverHost()
+      return unless domain
+      domains = loadProductionDomains()
+      saveProductionDomains(domains.concat(domain)) unless domain in domains
+      $input.val('')
+      update()
+
     $("[data-api-mate-server='url']").on "change keyup input", update
+    $("[data-api-mate-production-domain='add']").on "click", add
+    $input.on "keypress", (e) -> add() if e.which is 13
+    $list.on "click", ".close", ->
+      removed = $(this).data('domain')
+      saveProductionDomains(_.without(loadProductionDomains(), removed))
+      update()
+    # keeps the other open tabs in sync with the list
+    $(window).on "storage", (e) ->
+      update() if e.originalEvent.key is productionDomainsKey
     update()
 
   # Add a div with all links and a close button to the global
@@ -543,31 +576,46 @@ setInputValue = (selector, value) ->
     else
       $elem.val(value)
 
-# Whether the host in `url` matches the list of production domains, which holds only
-# their SHA-256 (see the Cakefile for the wildcards). So instead of matching patterns,
-# this hashes every form of the host an entry could have: each of its parent domains,
-# also with the numbers replaced by `#`, and each of its substrings as `*substring*`.
-isProductionServer = (url) ->
-  hashes = window.apiMateProductionDomainHashes
-  return false unless url? and hashes?.length
-  host = url.trim().toLowerCase()
+productionDomainsKey = 'apiMate.productionDomains'
+
+# The storage can be unavailable (e.g. blocked by the browser), which only disables
+# the production warning.
+loadProductionDomains = ->
+  try
+    domains = JSON.parse(window.localStorage.getItem(productionDomainsKey))
+    if _.isArray(domains) then domains else []
+  catch
+    []
+
+saveProductionDomains = (domains) ->
+  try
+    window.localStorage.setItem(productionDomainsKey, JSON.stringify(domains))
+  catch e
+    console.warn "API Mate: could not save the production domains", e
+
+hostFromUrl = (url) ->
+  return '' unless url?
+  url.trim().toLowerCase()
     .replace(/^[a-z][a-z0-9+.-]*:\/\//, '')
     .replace(/^[^\/@]*@/, '')
     .split(/[\/:?#]/)[0]
     .replace(/\.$/, '')
-  candidates = []
-  labels = host.split('.')
-  for i in [0...labels.length]
-    domain = labels[i..].join('.')
-    candidates.push(domain, domain.replace(/\d+/g, '#'))
-  for start in [0...host.length]
-    for end in [start+1..host.length]
-      candidates.push("*#{host[start...end]}*")
-  for candidate in candidates
-    shaObj = new jsSHA("SHA-256", "TEXT")
-    shaObj.update(candidate)
-    return true if shaObj.getHash("HEX") in hashes
-  false
+
+# Accepts a full URL too, so a server can be pasted as it is.
+normalizeProductionDomain = (domain) ->
+  domain = domain?.trim().toLowerCase() or ''
+  domain = hostFromUrl(domain) if domain.indexOf('/') >= 0
+  domain.replace(/^\*\./, '').replace(/\.$/, '')
+
+# In `domain`, `#` matches any number and `*` any text. Unless it starts with `*`, it
+# also matches its subdomains.
+matchesProductionDomain = (host, domain) ->
+  return false unless host and domain
+  pattern = domain.replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+    .replace(/#/g, '\\d+')
+    .replace(/\*/g, '.*')
+  pattern = "(.+\\.)?#{pattern}" unless domain[0] is '*'
+  new RegExp("^#{pattern}$").test(host)
 
 # Check if an input text field has a valid value (not empty).
 isFilled = (field) ->
