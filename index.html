@@ -88,17 +88,6 @@
                   <input class="form-control input-sm" id="input-custom-server-salt" type="text" value="8cd8ef52e8e101574e400365b55e11a6" placeholder="Salt" data-api-mate-server="salt">
                 </div>
               </div>
-              <div class="form-group">
-                <label class="control-label col-sm-3" for="input-production-domain">Production</label>
-                <div class="col-sm-9">
-                  <div class="input-group input-group-sm">
-                    <input class="form-control" id="input-production-domain" type="text" placeholder="Domain (empty to use the current server)" data-api-mate-production-domain="input"><span class="input-group-btn">
-                      <button class="btn btn-danger" type="button" data-api-mate-production-domain="add">Add</button></span>
-                  </div>
-                  <ul id="production-domains" data-api-mate-production-domain="list"></ul>
-                  <div class="tip">saved in this browser; e.g. conf.example.com, node#.example.org, *customer*</div>
-                </div>
-              </div>
             </div>
           </div>
           <div id="menu-inputs">
@@ -321,12 +310,40 @@ another/custom/call" data-api-mate-special-param="custom-calls" data-api-mate-se
             </div>
           </div>
         </div>
+        <div class="modal fade" id="production-domains-modal" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button class="close" type="button" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4>Production domains</h4>
+              </div>
+              <div class="modal-body">
+                <p class="help-block">
+                  When the server matches one of these domains, the page header turns red.
+                  The list is saved in this browser.
+                </p>
+                <div class="input-group input-group-sm">
+                  <input class="form-control" id="input-production-domain" type="text" placeholder="e.g. conf.example.com, node#.example.org, *customer*" data-api-mate-production-domain="input"><span class="input-group-btn">
+                    <button class="btn btn-danger" type="button" data-api-mate-production-domain="add">Add</button></span>
+                </div>
+                <button class="btn btn-default btn-sm" type="button" data-api-mate-production-domain="add-current">Add current server<code data-api-mate-production-domain="current"></code></button>
+                <ul id="production-domains" data-api-mate-production-domain="list"></ul>
+                <p class="empty" data-api-mate-production-domain="empty">No production domains configured.</p>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-link text-danger" type="button" data-api-mate-production-domain="clear">Clear all</button>
+                <button class="btn btn-default" type="button" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="row" id="footer">
       <div class="thanks col-sm-6">Thanks to the original idea from <a href="http://www.omarshammas.com/bbbapibuddy">API Buddy</a>!<i class="glyphicon glyphicon-thumbs-up"></i>
       </div>
-      <div class="experimental col-sm-6"><a href="redis_events.html">Redis Events</a><span> (experimental)</span></div>
+      <div class="experimental col-sm-6"><a id="production-domains-toggle" href="#production-domains-modal" data-toggle="modal"><i class="glyphicon glyphicon-lock"></i>Production domains<span data-api-mate-production-domain="count"></span></a><a href="redis_events.html">Redis Events</a><span> (experimental)</span>
+      </div>
     </div>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script type="text/javascript" src="vendor/bootstrap.min.js"></script>

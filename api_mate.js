@@ -164,10 +164,11 @@
     };
 
     ApiMate.prototype.bindProductionWarning = function() {
-      var $input, $list, add, pageTitle, serverHost, update;
+      var $addCurrent, $input, $list, add, addTyped, pageTitle, serverHost, update;
       pageTitle = document.title;
       $input = $("[data-api-mate-production-domain='input']");
       $list = $("[data-api-mate-production-domain='list']");
+      $addCurrent = $("[data-api-mate-production-domain='add-current']");
       serverHost = function() {
         return hostFromUrl($("[data-api-mate-server='url']").val());
       };
@@ -181,15 +182,19 @@
           $remove = $('<button type="button" class="close" aria-label="Remove">&times;</button>').data('domain', domain);
           $('<li>').text(domain).toggleClass('matched', matchesProductionDomain(host, domain)).append($remove).appendTo($list);
         }
+        $("[data-api-mate-production-domain='empty']").toggle(_.isEmpty(domains));
+        $("[data-api-mate-production-domain='clear']").prop('disabled', _.isEmpty(domains));
+        $("[data-api-mate-production-domain='count']").text(_.isEmpty(domains) ? '' : " (" + domains.length + ")");
+        $("[data-api-mate-production-domain='current']").text(host);
+        $addCurrent.prop('disabled', !host || __indexOf.call(domains, host) >= 0);
         isProduction = _.some(domains, function(domain) {
           return matchesProductionDomain(host, domain);
         });
         $('body').toggleClass('production-server', isProduction);
         return document.title = host ? "" + host + " - " + pageTitle : pageTitle;
       };
-      add = function() {
-        var domain, domains;
-        domain = normalizeProductionDomain($input.val()) || serverHost();
+      add = function(domain) {
+        var domains;
         if (!domain) {
           return;
         }
@@ -197,9 +202,43 @@
         if (__indexOf.call(domains, domain) < 0) {
           saveProductionDomains(domains.concat(domain));
         }
-        $input.val('');
         return update();
       };
+      addTyped = function() {
+        add(normalizeProductionDomain($input.val()));
+        return $input.val('');
+      };
+      $("[data-api-mate-server='url']").on("change keyup input", update);
+      $("[data-api-mate-production-domain='add']").on("click", addTyped);
+      $input.on("keypress", function(e) {
+        if (e.which === 13) {
+          return addTyped();
+        }
+      });
+      $addCurrent.on("click", function() {
+        return add(serverHost());
+      });
+      $list.on("click", ".close", function() {
+        var removed;
+        removed = $(this).data('domain');
+        saveProductionDomains(_.without(loadProductionDomains(), removed));
+        return update();
+      });
+      $("[data-api-mate-production-domain='clear']").on("click", function() {
+        if (confirm("Remove all the production domains saved in this browser?")) {
+          saveProductionDomains([]);
+          return update();
+        }
+      });
+      $("#production-domains-modal").on("shown.bs.modal", function() {
+        return $input.focus();
+      });
+      $(window).on("storage", function(e) {
+        if (e.originalEvent.key === productionDomainsKey) {
+          return update();
+        }
+      });
+      update();
       $("[data-api-mate-server='url']").on("change keyup input", update);
       $("[data-api-mate-production-domain='add']").on("click", add);
       $input.on("keypress", function(e) {
